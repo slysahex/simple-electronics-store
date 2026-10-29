@@ -4,6 +4,8 @@ An online store for Apple phones, tablets and accessories. We built it as a team
 
 [Live demo](https://mate-team-group-5.github.io/simple-electronics-store/) | [Original team repository](https://github.com/Mate-Team-Group-5/simple-electronics-store)
 
+To try the AI assistant, open the live demo and click the purple chat button in the bottom right corner. The first answer can take up to a minute while the free server wakes up.
+
 ![Adding a product to the cart: the image flies into the cart icon](docs/fly-to-cart.gif)
 
 ![Catalog page with filters and sorting](docs/catalog.png)
@@ -94,5 +96,7 @@ DB_URL=postgresql://...
 JWT_SECRET=...
 GROQ_API_KEY=...
 ```
+
+The AI chat needs the backend and a free Groq API key (`GROQ_API_KEY`).
 
 To run only the frontend without a database, leave out `VITE_SERVER_URL` and start it with `npm run dev`. It will use the local JSON data.
