@@ -1,6 +1,6 @@
 # Nice Gadgets
 
-An online store for Apple phones, tablets and accessories. We built it as a team of four in three weeks for our team project at Mate Academy.
+An online store for Apple phones, tablets and accessories. We built it as a team of four in two weeks for our team project at Mate Academy.
 
 [Live demo](https://mate-team-group-5.github.io/simple-electronics-store/) | [Original team repository](https://github.com/Mate-Team-Group-5/simple-electronics-store)
 
