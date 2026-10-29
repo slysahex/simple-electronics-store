@@ -1,0 +1,141 @@
+import React, { type RefObject } from 'react';
+import type { Category } from '@/hooks/useProducts';
+import type { Product } from '@/types/Product';
+import { ColorSelector } from '@/components/molecules/ColorSelector';
+import { CapacitySelector } from '@/components/molecules/CapacitySelector/CapacitySelector';
+import { SpecsList } from '@/components/molecules/SpecsList/SpecsList';
+import { AddToCartButton } from '@/components/atoms/AddToCartButton';
+import { FavouriteButton } from '@/components/atoms/FavouriteButton/FavouriteButton';
+import { useAccountContext } from '@/context/AccountContext';
+import { useFavourites } from '@/hooks/useFavourites';
+import type { ProductDetails } from '@/types/ProductDetails';
+import { useLanguage } from '@/context/LanguageContext';
+import { flyToTarget, type FlyTarget } from '@/utils/flyToTarget';
+
+type Props = {
+  product: ProductDetails;
+  category: Category;
+  catalogProduct: Product | null;
+  flySourceRef?: RefObject<HTMLImageElement | null>;
+};
+
+export const ProductPurchase: React.FC<Props> = ({
+  product,
+  category,
+  catalogProduct,
+  flySourceRef,
+}) => {
+  const { t } = useLanguage();
+  const { cartItems, addCartItem, updateCartItem, removeCartItem } =
+    useAccountContext();
+  const { isFavourite, toggleFavourite } = useFavourites();
+
+  const cartQuantity =
+    catalogProduct ?
+      cartItems.find((item) => item.id === catalogProduct.id)?.quantity
+    : undefined;
+
+  function flyImageTo(target: FlyTarget) {
+    if (flySourceRef?.current) {
+      flyToTarget(flySourceRef.current, target);
+    }
+  }
+
+  function handleAddToCart() {
+    if (!catalogProduct) return;
+
+    if (cartQuantity) {
+      updateCartItem(catalogProduct.id, cartQuantity + 1);
+    } else {
+      addCartItem(catalogProduct, 1);
+      flyImageTo('cart'); // ← новое
+    }
+  }
+
+  function handleFavouriteClick() {
+    if (!catalogProduct) return;
+
+    if (!isFavourite(catalogProduct.id)) {
+      flyImageTo('favourites');
+    }
+
+    toggleFavourite(catalogProduct.id);
+  }
+
+  function handleRemoveFromCart() {
+    if (!catalogProduct || !cartQuantity) return;
+
+    if (cartQuantity > 1) {
+      updateCartItem(catalogProduct.id, cartQuantity - 1);
+    } else {
+      removeCartItem(catalogProduct.id);
+    }
+  }
+
+  // The cart, checkout, catalog and AI chat use prices from the products list,
+  // so the page shows the same price (details data has different prices)
+  const price = catalogProduct?.price ?? product.priceDiscount;
+  const fullPrice = catalogProduct?.fullPrice ?? product.priceRegular;
+  const shortSpecs = [
+    { label: t('specs.screen'), value: product.screen },
+    { label: t('specs.resolution'), value: product.resolution },
+    { label: t('specs.processor'), value: product.processor },
+    { label: t('specs.ram'), value: product.ram },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <ColorSelector
+        category={category}
+        colors={product.colorsAvailable}
+        selectedColor={product.color}
+        namespaceId={product.namespaceId}
+        capacity={product.capacity}
+        catalogId={catalogProduct?.id ?? null}
+      />
+
+      <div className="flex w-full flex-col gap-6 tablet:max-w-60 desktop:max-w-80">
+        <hr className="border-elements" />
+
+        <CapacitySelector
+          category={category}
+          capacities={product.capacityAvailable}
+          selectedColor={product.color}
+          namespaceId={product.namespaceId}
+          capacity={product.capacity}
+        />
+
+        <hr className="border-elements" />
+
+        <div className="flex items-center gap-2">
+          <span className="text-[32px] font-extrabold text-primary">
+            ${price}
+          </span>
+
+          {price < fullPrice && (
+            <span className="text-[22px] text-secondary line-through">
+              ${fullPrice}
+            </span>
+          )}
+        </div>
+
+        {catalogProduct && (
+          <div className="flex gap-2">
+            <AddToCartButton
+              productsCount={cartQuantity}
+              onAddToCart={handleAddToCart}
+              onDelete={handleRemoveFromCart}
+            />
+
+            <FavouriteButton
+              isFavourite={isFavourite(catalogProduct.id)}
+              onClick={handleFavouriteClick} // ← новое
+            />
+          </div>
+        )}
+
+        <SpecsList specs={shortSpecs} />
+      </div>
+    </div>
+  );
+};
